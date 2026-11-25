@@ -1,0 +1,128 @@
+# Sesion 2026-11-25 (a peticion del usuario: plugin del End con dia/hora, vida/ataque, drops, top dano, placeholders...).
+#
+# COMO FUNCIONA (v1.2, SIN reiniciar el servidor)
+#  - A la hora indicada en schedule.times el plugin hace aparecer al dragon en el End (con aviso previo) y,
+#    si crystals.regenerate=true, regenera los cristales de los pilares.
+#  - El plugin NO toca el terreno: la isla se protege con regiones de WorldGuard (ver docs/survival_end_dragon.txt).
+#  - Solo el plugin puede hacer aparecer al dragon; cualquier otro spawn se cancela.
+#  - Si el servidor estaba apagado a la hora, se hace aparecer al arrancar solo si han pasado menos de
+#    catch-up-minutes; si no, se salta hasta la siguiente.
+
+schedule:
+  timezone: Europe/Madrid
+  # Cuando debe aparecer el dragon. Formatos: "SATURDAY 20:00" / "SABADO 20:00" / "DAILY 20:00" (todos los dias).
+  times:
+    - "SATURDAY 20:00"
+  catch-up-minutes: 30
+  # Avisos (minutos antes).
+  warn-minutes: [10, 5, 1]
+
+# Mundo del End (vacio = el primero de tipo THE_END). En survival: survival_the_end
+end-world: ""
+# Donde aparece el dragon.
+spawn:
+  x: 0.5
+  y: 90
+  z: 0.5
+
+crystals:
+  # Regenerar los cristales de los pilares cada vez que aparece el dragon.
+  regenerate: true
+
+portals:
+  # Sesion 2026-11-26: no se puede entrar al End por portal desde el mundo normal (overworld). La vuelta si funciona.
+  block-end-portal-from-overworld: true
+
+bossbar:
+  # Bossbar con la vida (ej. 575/1000) para jugadores a menos de 'radius' bloques del dragon (0 = todo el End).
+  radius: 300
+  title: "&5&l✦ Dragón del End &f%health%/%max%"
+  color: PINK      # PINK, BLUE, RED, GREEN, YELLOW, PURPLE, WHITE
+  style: PROGRESS  # PROGRESS, NOTCHED_6, NOTCHED_10, NOTCHED_12, NOTCHED_20
+
+dragon:
+  # Vida del dragon (vanilla 200). OJO: spigot.yml -> settings.attribute.maxHealth.max (por defecto 2048) limita el maximo.
+  health: 2000
+  damage:
+    # Multiplicadores del dano que HACE el dragon a jugadores (1.0 = vanilla).
+    melee-multiplier: 1.5
+    breath-multiplier: 1.5
+
+# Reparto de drops
+rewards:
+  # Cuantos jugadores del top dano entran en el reparto.
+  top-size: 3
+  # false: CADA unidad de drop se sortea por separado entre el top, ponderada por % de dano (un jugador puede llevarse varias).
+  # true: cada drop va a un jugador distinto del top mientras sea posible (sin sorteo entre ellos).
+  unique-winners: false
+
+# Drops. Para cada entrada: chance = % de que el drop salga (una vez); si sale, se generan entre min y max unidades
+# (uniforme) y CADA unidad se sortea entre el top 3 segun su % de dano.
+# type ITEM: material/amount/name/lore/enchants (sin name/lore = item vanilla).  type COMMAND: commands (consola, %player% = ganador).
+drops:
+  # Huevo de dragon VANILLA (sin nombre ni lore).
+  huevo:
+    chance: 15
+    min: 1
+    max: 1
+    type: ITEM
+    material: DRAGON_EGG
+    amount: 1
+    display: "&5Huevo de Dragón"
+  # Escamas de Dragon: item SOLO para tradeos (dried kelp con brillo). no-use: no se come, no se craftea, no va al compostador.
+  # Dar a mano: /endregen give <jugador> escamas 16
+  escamas:
+    chance: 100
+    min: 0
+    max: 3
+    type: ITEM
+    material: DRIED_KELP
+    amount: 1
+    glint: true
+    no-use: true
+    name: "&#C77DFF&l✦ &#9D4EDD&lEscamas de Dragón &#C77DFF&l✦"
+    lore:
+      - "&7Escamas arrancadas a la piel del"
+      - "&5&lDragón del End&7, endurecidas por"
+      - "&7siglos de energía del Vacío."
+      - ""
+      - "&d✦ &fMaterial de comercio"
+      - "&8Los mercaderes pagan bien por ellas."
+      - "&8No sirven para nada más."
+      - ""
+      - "&5&l⚜ MATERIAL ÉPICO"
+    display: "&dEscamas de Dragón"
+  # Paquetes de TierDrops (plugin propio): /tierdrop give <tier> <jugador> [cantidad]
+  legendarios:
+    chance: 100
+    min: 0
+    max: 2
+    type: COMMAND
+    commands:
+      - "tierdrop give legendario %player% 1"
+    display: "&6Paquete de Drop Legendario"
+  epicos:
+    chance: 100
+    min: 2
+    max: 4
+    type: COMMAND
+    commands:
+      - "tierdrop give epico %player% 1"
+    display: "&dPaquete de Drop Épico"
+
+placeholder:
+  no-data: "-"
+
+messages:
+  end-portal-disabled: "&5&l✦ &dEl portal del End está &cdeshabilitado&d en este mundo."
+  warn: "&5&l✦ &dEl &5&lDragón del End &daparecerá en &f%minutes% min&d. &7¡Prepárate!"
+  dragon-spawned: "&5&l✦ &d¡El &5&lDragón del End &dha despertado! &7Derrótalo en el End."
+  divider: "&c----------------------------------------"
+  killed: "&6&l⚔ &e&l%player% &f&lha derrotado al &5&lDragón del End&f&l!"
+  killed-nokiller: "&f&l⚔ &5&lDragón del End &f&lha sido derrotado!"
+  death-line: "&f&l%medal% &e&l%player%&7 - &f%damage% de daño &7(&e%percent%%&7)"
+  drops-header: "&a&l  El Dragón del End ha dejado caer:"
+  no-drops: "&f&l  El Dragón del End no ha dejado caer nada esta vez."
+  drop-line: "&d&l  ✦ &f&l%drop% &7➜ &e&l%player%"
+  reward-received: "&5&l✦ &dHas recibido: &f%drop%"
+  reward-pending: "&5&l✦ &dEstabas desconectado: te entregamos tus recompensas del dragón."

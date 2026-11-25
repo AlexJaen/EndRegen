@@ -1,0 +1,17 @@
+name: EndRegen
+version: '1.2.0'
+main: com.df15.endregen.EndRegen
+api-version: '1.21'
+load: STARTUP
+softdepend: [PlaceholderAPI]
+description: Hace aparecer al dragon del End en dia y hora fijos (vida/dano/drops/top dano configurables) en dia y hora fijos.
+commands:
+  endregen:
+    description: Gestiona el dragon del End.
+    usage: /endregen <status|top|spawn|remove|crystals|give|reload>
+    permission: endregen.admin
+    permission-message: "§cNo tienes permiso."
+permissions:
+  endregen.admin:
+    description: Usar /endregen (solo staff/op).
+    default: op
